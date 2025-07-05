@@ -7,13 +7,24 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/technoDiktator/hackernews/graph/model"
+	"github.com/technoDiktator/hackernews/internal/links"
 )
 
 // CreateLink is the resolver for the createLink field.
+// func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
+// 	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
+// }
+
+// here i am writing a dummy function for create link resolver
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
+	var link links.Link
+	link.Title = input.Title
+	link.Address = input.Address
+	linkID := link.Save()
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title: link.Title, Address: link.Address}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -32,9 +43,40 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 }
 
 // Links is the resolver for the links field.
+// func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
+// 	panic(fmt.Errorf("not implemented: Links - links"))
+// }
+
+// writeing a dummy resolver for the links query
+// func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
+// 	// This is a dummy implementation. Replace with actual logic to fetch links.
+// 	var links []*model.Link
+
+// 	dummyLink := &model.Link{
+// 		Address: "https://example.com",
+// 		Title:   "Example Link",
+// 		User: &model.User{
+// 			ID:   "1",
+// 			Name: "John Doe",
+// 		},
+// 	}
+// 	links = append(links, dummyLink)
+// 	return links, nil
+
+// }
+
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
-	panic(fmt.Errorf("not implemented: Links - links"))
+	var resultLinks []*model.Link
+	var dbLinks []links.Link
+	dbLinks = links.GetAll()
+	for _, link := range dbLinks{
+		resultLinks = append(resultLinks, &model.Link{ID:link.ID, Title:link.Title, Address:link.Address})
+	}
+	return resultLinks, nil
 }
+
+
+
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }

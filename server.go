@@ -11,6 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/technoDiktator/hackernews/graph"
+	database "github.com/technoDiktator/hackernews/internal/pkg/db/migrations/mysql"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -21,6 +22,11 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
+	// router :=  chi.NewRouter()
+	database.InitDB()
+	defer database.CloseDB()
+	database.Migrate()
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
@@ -40,4 +46,6 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+
+	
 }
